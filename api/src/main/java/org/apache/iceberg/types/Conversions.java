@@ -68,6 +68,8 @@ public class Conversions {
         return new BigDecimal(asString);
       case DATE:
         return Literal.of(asString).to(Types.DateType.get()).value();
+      case UNKNOWN:
+        return null;
       default:
         throw new UnsupportedOperationException(
             "Unsupported type for fromPartitionString: " + type);
@@ -117,6 +119,9 @@ public class Conversions {
         return (ByteBuffer) value;
       case DECIMAL:
         return ByteBuffer.wrap(((BigDecimal) value).unscaledValue().toByteArray());
+      case UNKNOWN:
+        // TODO: again, just for safety
+        return null;
       default:
         throw new UnsupportedOperationException("Cannot serialize type: " + typeId);
     }
@@ -177,6 +182,9 @@ public class Conversions {
         byte[] unscaledBytes = new byte[buffer.remaining()];
         tmp.get(unscaledBytes);
         return new BigDecimal(new BigInteger(unscaledBytes), decimal.scale());
+      case UNKNOWN:
+        // TODO: again, safety
+        return null;
       default:
         throw new UnsupportedOperationException("Cannot deserialize type: " + type);
     }
