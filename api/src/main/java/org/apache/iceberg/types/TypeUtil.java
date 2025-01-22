@@ -418,6 +418,10 @@ public class TypeUtil {
         Types.DecimalType toDecimal = (Types.DecimalType) to;
         return fromDecimal.scale() == toDecimal.scale()
             && fromDecimal.precision() <= toDecimal.precision();
+
+      case UNKNOWN:
+        // TODO: first round: unknown can be promoted to any type
+        return true;
     }
 
     return false;
@@ -507,6 +511,9 @@ public class TypeUtil {
 
   private static int estimateSize(Type type) {
     switch (type.typeId()) {
+      case UNKNOWN:
+        // unknown type variable is always null
+        return 0;
       case BOOLEAN:
         // the size of a boolean variable is virtual machine dependent
         // it is common to believe booleans occupy 1 byte in most JVMs

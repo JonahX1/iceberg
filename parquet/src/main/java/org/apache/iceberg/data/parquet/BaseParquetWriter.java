@@ -30,7 +30,9 @@ import java.util.Optional;
 import org.apache.iceberg.parquet.ParquetTypeVisitor;
 import org.apache.iceberg.parquet.ParquetValueWriter;
 import org.apache.iceberg.parquet.ParquetValueWriters;
+import org.apache.iceberg.parquet.TripleWriter;
 import org.apache.iceberg.relocated.com.google.common.base.Preconditions;
+import org.apache.iceberg.relocated.com.google.common.collect.ImmutableList;
 import org.apache.iceberg.relocated.com.google.common.collect.Lists;
 import org.apache.parquet.column.ColumnDescriptor;
 import org.apache.parquet.io.api.Binary;
@@ -170,6 +172,12 @@ public abstract class BaseParquetWriter<T> {
 
     @Override
     public Optional<ParquetValueWriters.PrimitiveWriter<?>> visit(
+        LogicalTypeAnnotation.IntervalLogicalTypeAnnotation intervalType) {
+      return Optional.of(new UnknownWriter(desc));
+    }
+
+    @Override
+    public Optional<ParquetValueWriters.PrimitiveWriter<?>> visit(
         LogicalTypeAnnotation.DecimalLogicalTypeAnnotation decimalType) {
       switch (desc.getPrimitiveType().getPrimitiveTypeName()) {
         case INT32:
@@ -298,6 +306,20 @@ public abstract class BaseParquetWriter<T> {
     @Override
     public void write(int repetitionLevel, byte[] value) {
       column.writeBinary(repetitionLevel, Binary.fromReusedByteArray(value));
+    }
+  }
+
+  private static class UnknownWriter extends ParquetValueWriters.PrimitiveWriter<Object> {
+    private UnknownWriter(ColumnDescriptor desc) {
+      super(desc);
+    }
+
+    @Override
+    public void write(int repetitionLevel, Object value) {}
+
+    @Override
+    public List<TripleWriter<?>> columns() {
+      return ImmutableList.of();
     }
   }
 }

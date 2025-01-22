@@ -196,6 +196,9 @@ public interface Transform<S, T> extends Serializable {
         } else {
           throw new UnsupportedOperationException("Unsupported binary type: " + value.getClass());
         }
+      case UNKNOWN:
+        // TODO: optional, more like a safety check
+        return "null";
       default:
         return value.toString();
     }

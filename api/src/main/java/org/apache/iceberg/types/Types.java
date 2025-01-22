@@ -55,6 +55,7 @@ public class Types {
           .put(StringType.get().toString(), StringType.get())
           .put(UUIDType.get().toString(), UUIDType.get())
           .put(BinaryType.get().toString(), BinaryType.get())
+          .put(UnknownType.get().toString(), UnknownType.get())
           .buildOrThrow();
 
   private static final Pattern FIXED = Pattern.compile("fixed\\[\\s*(\\d+)\\s*\\]");
@@ -412,6 +413,24 @@ public class Types {
     }
   }
 
+  public static class UnknownType extends PrimitiveType {
+    private static final UnknownType INSTANCE = new UnknownType();
+
+    public static UnknownType get() {
+      return INSTANCE;
+    }
+
+    @Override
+    public TypeID typeId() {
+      return TypeID.UNKNOWN;
+    }
+
+    @Override
+    public String toString() {
+      return "unknown";
+    }
+  }
+
   public static class VariantType implements Type {
     private static final VariantType INSTANCE = new VariantType();
 
@@ -613,6 +632,13 @@ public class Types {
         Object writeDefault) {
       Preconditions.checkNotNull(name, "Name cannot be null");
       Preconditions.checkNotNull(type, "Type cannot be null");
+      if (type.typeId() == Type.TypeID.UNKNOWN) {
+        Preconditions.checkArgument(isOptional, "Unknown type field must be optional");
+        Preconditions.checkArgument(
+            initialDefault == null, "Unknown type cannot have non-null initial-default");
+        Preconditions.checkArgument(
+            writeDefault == null, "Unknown type cannot have non-null write-default");
+      }
       this.isOptional = isOptional;
       this.id = id;
       this.name = name;
